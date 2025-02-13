@@ -1,8 +1,7 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/montserrat/4.7.0/css/montserrat.min.css');
 
 * {
-	margin: 0;
-	padding: 0;
+
 	box-sizing: border-box;
 	font-family: 'Montserrat', sans-serif;
 }
@@ -10,26 +9,26 @@
 html, body {
 	scrollbar-width: none;
 	-ms-overflow-style: none;
+	min-height: 100vh;
+	color: white;
 }
 
-body::-webkit-scrollbar {
+body::-webkit-scrollbar,
+.command-line::-webkit-scrollbar {
 	display: none;
 }
 
 body {
-	color: white;
-	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
 	background: url('https://banmaixanh.org/image/cover/001-053.jpg') center/cover;
-	overflow-x: hidden;
-	overflow-y: hidden;
+	overflow: hidden;
 }
 
 .terminal {
 	width: min(1200px, 100% - 20px);
-	margin: 20px auto;
 	height: calc(100vh - 50px);
+	margin: 20px auto;
 	border: 2px solid rgba(255, 255, 255, 0.1);
 	border-radius: 1rem;
 	background-color: rgba(0, 0, 0, 0.7);
@@ -53,9 +52,17 @@ body {
 	border-radius: 50%;
 }
 
-.close { background: #ff5f56; }
-.minimize { background: #ffbd2e; }
-.maximize { background: #27c93f; }
+.close { 
+	background: #ff5f56;
+}
+
+.minimize { 
+	background: #ffbd2e;
+}
+
+.maximize { 
+	background: #27c93f;
+}
 
 .command-content {
 	height: calc(100% - 50px);
@@ -64,12 +71,17 @@ body {
 }
 
 .command-line {
-	overflow-wrap: break-word; 
-	white-space: pre-wrap;
-	line-height: 1.5;
-	padding: 10px;
 	height: 100%;
+	padding: 10px;
+	line-height: 1.5;
 	overflow-y: hidden;
+	overflow-wrap: break-word;
+	white-space: pre-wrap;
+}
+
+p {
+	font-size: 1.2rem;
+	margin: 1rem;
 }
 
 @media screen and (max-width: 960px) {
