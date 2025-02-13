@@ -47,7 +47,7 @@
 						try {
 						const response = await fetch("https://ipinfo.io/json?token=87aa8f284fb4f6");
 						const data = await response.json();
-						ipElement.textContent = `Địa chỉ mạng: ${data.ip}`;
+						ipElement.textContent = `Địa chỉ: ${data.ip}`;
 						} catch (error) {
 						console.error(`Lỗi khi lấy địa chỉ:, error.`);
 						ipElement.textContent = `Không thể lấy địa chỉ.`;
@@ -110,7 +110,7 @@
 
 				fetchRSSFeed();
 				setInterval(fetchRSSFeed, 300000);
-				setInterval(addCommand, 100);
+				setInterval(addCommand, 500);
 
 			</script>
 
