@@ -2,48 +2,56 @@
 import Click from '~/javascript/controls.astro';
 import Address from '~/javascript/address.astro';
 import Feed from '~/javascript/feed.astro';
+
+import {
+	Slideup
+} from '~/assets/framer.jsx';
 ---
 
-<section class="relative md:-mt-[76px] not-prose">
+<Slideup client:visible>
 
-	<div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+	<section class="relative md:-mt-[76px] not-prose">
 
-		<div class="relative max-w-7xl mx-auto">
+		<div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
 
-		<div class="pt-0 md:pt-[120px] pointer-events-none"></div>
+			<div class="relative max-w-7xl mx-auto">
 
-			<div class="terminal">
+			<div class="pt-0 md:pt-[120px] pointer-events-none"></div>
 
-				<div class="window-controls">
+				<div class="terminal">
 
 					<div class="window-controls">
 
-						<div class="control close"></div>
+						<div class="window-controls">
 
-						<div class="control minimize"></div>
+							<div class="control close"></div>
 
-						<div class="control maximize"></div>
+							<div class="control minimize"></div>
+
+							<div class="control maximize"></div>
+
+						</div>
+
+						<p id="user-ip">Đang lấy địa chỉ</p>
 
 					</div>
 
-					<p id="user-ip">Đang lấy địa chỉ</p>
+					<div class="command-content">
+
+						<p class="command-line" id="output"></p>
+
+					</div>
 
 				</div>
 
-				<div class="command-content">
+				<Click/>
 
-					<p class="command-line" id="output"></p>
+				<Address/>
 
-				</div>
+				<Feed/>
 
-			</div>
+		</div>
 
-			<Click/>
+	</section>
 
-			<Address/>
-
-			<Feed/>
-
-	</div>
-
-</section>
+</Slideup>
