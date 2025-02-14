@@ -25,7 +25,7 @@ body {
 }
 
 .terminal {
-	width: min(1400px, 100% - 20px);
+	width: min(1200px, 100% - 20px);
 	height: calc(100vh - 50px);
 	margin: 20px auto;
 	border: 2px solid rgba(255, 255, 255, 0.1);

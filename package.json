@@ -1,7 +1,8 @@
 {
-	"name": "astro-terminal",
+	"name": "@nhavantuonglai/terminal",
+	"description": "Viết là nuôi dưỡng niềm đam mê, chữ để ươm mầm điều yêu thích. Học và hoàn thiện kỹ năng mỗi ngày không mong gì hơn đó là điều duy nhất người ta nhớ để nhắc về.",
 	"type": "module",
-	"version": "0.0.1",
+	"version": "1.2.7",
 	"scripts": {
 		"dev": "astro dev",
 		"start": "astro dev",
@@ -11,7 +12,7 @@
 	},
 	"dependencies": {
 		"astro": "^4.0.7",
-		"framer-motion": "^12.0.11",
+		"framer-motion": "^12.0.11"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.3.4",
