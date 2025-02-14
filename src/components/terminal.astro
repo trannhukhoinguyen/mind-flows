@@ -1,3 +1,9 @@
+---
+import Click from '~/javascript/controls.astro';
+import Address from '~/javascript/address.astro';
+import Feed from '~/javascript/feed.astro';
+---
+
 <section class="relative md:-mt-[76px] not-prose">
 
 	<div class="absolute inset-0 pointer-events-none" aria-hidden="true"></div>
@@ -32,87 +38,11 @@
 
 			</div>
 
-			<script client:load>
+			<Click/>
 
-				document.querySelectorAll('.window-controls .control').forEach(div => {
-					div.addEventListener('click', () => {
-					window.location.href = 'https://nhavantuonglai.com';
-						});
-					});
+			<Address/>
 
-				document.addEventListener("DOMContentLoaded", async () => {
-					const ipElement = document.getElementById("user-ip");
-					if (ipElement) {
-						ipElement.textContent = `Đang lấy địa chỉ.`;
-						try {
-						const response = await fetch("https://ipinfo.io/json?token=87aa8f284fb4f6");
-						const data = await response.json();
-						ipElement.textContent = `Địa chỉ: ${data.ip}`;
-						} catch (error) {
-						console.error(`Lỗi khi lấy địa chỉ:, error.`);
-						ipElement.textContent = `Không thể lấy địa chỉ.`;
-						}
-					}
-
-				});
-
-				const output = document.getElementById('output');
-				let commandHistory = '';
-				let descriptions = [];
-				let currentIndex = 0;
-
-				async function fetchRSSFeed() {
-					try {
-						const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml');
-						const text = await response.text();
-						const parser = new DOMParser();
-						const xmlDoc = parser.parseFromString(text, 'text/xml');
-						const items = xmlDoc.getElementsByTagName('description');
-						
-						descriptions = [];
-						for (let item of items) {
-							const description = item.textContent.trim();
-							if (description && description.length > 0) {
-								descriptions.push(description);
-							} else {
-								descriptions.push(`Query content is not available, related content will be refreshed.`);
-							}
-						}
-
-						if (descriptions.length === 0) {
-							descriptions = [`Query content is not available, related content will be refreshed.`];
-						}
-					} catch (error) {
-						descriptions = [`Query content is not available, related content will be refreshed.`];
-						console.error(`Error fetching RSS:, error`);
-					}
-				}
-
-				function addCommand() {
-					if (descriptions.length === 0) {
-						return;
-					}
-
-					const description = descriptions[currentIndex];
-					const timestamp = new Date().toLocaleTimeString();
-					commandHistory += `${timestamp}: ${description}\n`;
-					output.textContent = commandHistory;
-					
-					output.scrollTop = output.scrollHeight;
-					
-					const lines = commandHistory.split('\n');
-					if (lines.length > 100) {
-						commandHistory = lines.slice(-100).join('\n');
-					}
-
-					currentIndex = (currentIndex + 1) % descriptions.length;
-				}
-
-				fetchRSSFeed();
-				setInterval(fetchRSSFeed, 300000);
-				setInterval(addCommand, 500);
-
-			</script>
+			<Feed/>
 
 	</div>
 

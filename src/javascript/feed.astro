@@ -1,0 +1,59 @@
+<script client:load>
+
+	const output = document.getElementById('output');
+	let commandHistory = '';
+	let descriptions = [];
+	let currentIndex = 0;
+
+	async function fetchRSSFeed() {
+		try {
+			const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml');
+			const text = await response.text();
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(text, 'text/xml');
+			const items = xmlDoc.getElementsByTagName('description');
+			
+			descriptions = [];
+			for (let item of items) {
+				const description = item.textContent.trim();
+				if (description && description.length > 0) {
+					descriptions.push(description);
+				} else {
+					descriptions.push(`Query content is not available, related content will be refreshed.`);
+				}
+			}
+
+			if (descriptions.length === 0) {
+				descriptions = [`Query content is not available, related content will be refreshed.`];
+			}
+		} catch (error) {
+			descriptions = [`Query content is not available, related content will be refreshed.`];
+			console.error(`Error fetching RSS:, error`);
+		}
+	}
+
+	function addCommand() {
+		if (descriptions.length === 0) {
+			return;
+		}
+
+		const description = descriptions[currentIndex];
+		const timestamp = new Date().toLocaleTimeString();
+		commandHistory += `${timestamp}: ${description}\n`;
+		output.textContent = commandHistory;
+		
+		output.scrollTop = output.scrollHeight;
+		
+		const lines = commandHistory.split('\n');
+		if (lines.length > 100) {
+			commandHistory = lines.slice(-100).join('\n');
+		}
+
+		currentIndex = (currentIndex + 1) % descriptions.length;
+	}
+
+	fetchRSSFeed();
+	setInterval(fetchRSSFeed, 300000);
+	setInterval(addCommand, 1000);
+
+</script>
