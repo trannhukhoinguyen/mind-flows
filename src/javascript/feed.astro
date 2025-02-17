@@ -1,59 +1,131 @@
 <script client:load>
 
-	const output = document.getElementById('output');
-	let commandHistory = '';
-	let descriptions = [];
-	let currentIndex = 0;
+	class RSSFeedReader {
 
-	async function fetchRSSFeed() {
-		try {
-			const response = await fetch('https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml');
-			const text = await response.text();
-			const parser = new DOMParser();
-			const xmlDoc = parser.parseFromString(text, 'text/xml');
-			const items = xmlDoc.getElementsByTagName('description');
+		constructor(outputElementId, options = {}) {
+
+			this.output = document.getElementById(outputElementId);
+			this.commandHistory = '';
+			this.descriptions = [];
+			this.currentIndex = 0;
+			this.isFirstLoad = true;
+
+			this.options = {
+				corsProxy: 'https://api.allorigins.win/get?url=',
+				rssUrl: 'https://vnexpress.net/rss/tin-moi-nhat.rss',
+				refreshInterval: 300000,
+				displayInterval: 10000,
+				chunkSize: 5,
+				maxHistoryLines: 100,
+				...options
+			};
+
+			this.seenTitles = new Set();
+		}
+
+		cleanText(text) {
+			return text
+				.replace(/<!\[CDATA\[/g, '')
+				.replace(/\]\]>/g, '')
+				.replace(/<[^>]*>/g, '')
+				.replace(/['"]/g, '')
+				.replace(/\s*-\s*/g, ' ')
+				.replace(/\s+/g, ' ')
+				.replace(/&quot;/g, '')
+				.replace(/&amp;/g, '')
+				.replace(/&lt;/g, '')
+				.replace(/&gt;/g, '')
+				.replace(/&nbsp;/g, ' ')
+				.trim();
+		}
+
+		formatTime(date) {
+			const pad = num => num.toString().padStart(2, '0');
+			const hours = pad(date.getHours());
+			const minutes = pad(date.getMinutes());
+			const seconds = pad(date.getSeconds());
+			return `${hours} giờ ${minutes} phút ${seconds} giây`;
+		}
+
+		async fetchRSSFeed() {
+			try {
+				const response = await fetch(this.options.corsProxy + encodeURIComponent(this.options.rssUrl));
+				if (!response.ok) throw new Error('Dữ liệu đầu vào đang bị quá tải, vui lòng thử lại sau.');
+				
+				const data = await response.json();
+				const parser = new DOMParser();
+				const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+				const items = xmlDoc.getElementsByTagName('item');
+				
+				console.log('Found items:', items.length);
+				this.processItems(items);
+			} catch (error) {
+				console.error('Error fetching RSS:', error);
+				if (this.isFirstLoad) {
+					this.descriptions = ['Dữ liệu đầu ra đang bị quá tải, vui lòng thử lại sau.'];
+					this.addCommand();
+					this.isFirstLoad = false;
+				}
+			}
+		}
+
+		processItems(items) {
+			const newDescriptions = [];
 			
-			descriptions = [];
-			for (let item of items) {
-				const description = item.textContent.trim();
-				if (description && description.length > 0) {
-					descriptions.push(description);
-				} else {
-					descriptions.push(`Query content is not available, related content will be refreshed.`);
+			for (let i = 0; i < items.length; i++) {
+				const item = items[i];
+				const title = this.cleanText(item.getElementsByTagName('title')[0]?.textContent || '');
+				
+				if (this.seenTitles.has(title)) continue;
+				
+				const descriptionNode = item.getElementsByTagName('description')[0];
+				if (descriptionNode) {
+					const description = this.cleanText(descriptionNode.textContent);
+					if (description) {
+						newDescriptions.push(`${title}\n${description}`);
+						this.seenTitles.add(title);
+					}
 				}
 			}
 
-			if (descriptions.length === 0) {
-				descriptions = [`Query content is not available, related content will be refreshed.`];
+			this.descriptions = [...newDescriptions, ...this.descriptions].slice(0, 50);
+			
+			if (this.seenTitles.size > 100) {
+				const titlesArray = Array.from(this.seenTitles);
+				this.seenTitles = new Set(titlesArray.slice(-100));
 			}
-		} catch (error) {
-			descriptions = [`Query content is not available, related content will be refreshed.`];
-			console.error(`Error fetching RSS:, error`);
+		}
+
+		addCommand() {
+			if (this.descriptions.length === 0) return;
+
+			const timestamp = this.formatTime(new Date());
+			const description = this.descriptions[this.currentIndex];
+			this.commandHistory += `${timestamp}: ${description}\n\n`;
+
+			if (this.output) {
+				this.output.textContent = this.commandHistory;
+				this.output.scrollTop = this.output.scrollHeight;
+			}
+
+			const lines = this.commandHistory.split('\n');
+			if (lines.length > this.options.maxHistoryLines) {
+				this.commandHistory = lines.slice(-this.options.maxHistoryLines).join('\n');
+			}
+
+			this.currentIndex = (this.currentIndex + 1) % this.descriptions.length;
+		}
+
+		init() {
+			this.fetchRSSFeed();
+			setInterval(() => this.fetchRSSFeed(), this.options.refreshInterval);
+			setInterval(() => this.addCommand(), this.options.displayInterval);
 		}
 	}
 
-	function addCommand() {
-		if (descriptions.length === 0) {
-			return;
-		}
-
-		const description = descriptions[currentIndex];
-		const timestamp = new Date().toLocaleTimeString();
-		commandHistory += `${timestamp}: ${description}\n`;
-		output.textContent = commandHistory;
-		
-		output.scrollTop = output.scrollHeight;
-		
-		const lines = commandHistory.split('\n');
-		if (lines.length > 100) {
-			commandHistory = lines.slice(-100).join('\n');
-		}
-
-		currentIndex = (currentIndex + 1) % descriptions.length;
-	}
-
-	fetchRSSFeed();
-	setInterval(fetchRSSFeed, 300000);
-	setInterval(addCommand, 1000);
+	document.addEventListener('DOMContentLoaded', () => {
+		const rssReader = new RSSFeedReader('output');
+		rssReader.init();
+	});
 
 </script>
