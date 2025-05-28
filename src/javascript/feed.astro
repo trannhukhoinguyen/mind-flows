@@ -68,6 +68,21 @@
 				}
 			}
 		}
+    
+    async localFetchRSSFeed() {
+      try {
+        const response = await fetch('/local-rss.xml');
+        const rssText = await response.text();
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(rssText, 'text/xml');
+        const items = xmlDoc.getElementsByTagName('item');
+
+        this.processItems(items);
+      } catch (error) {
+        console.error('Lỗi khi đọc RSS local:', error);
+      }
+    }
 
 		processItems(items) {
 			const newDescriptions = [];
